@@ -1,4 +1,4 @@
-package com.nintendont.utils
+package com.nintendont.kotlin.detection.utils
 
 import org.opencv.core.Core
 import org.opencv.core.Mat
@@ -13,12 +13,12 @@ import java.util.*
  */
 class NintendontImage {
     var url:                   String = ""
-    var image:                 Mat = Mat()
-    var greyImage:             Mat = Mat()
-    var rgbImage:              Mat = Mat()
-    var hlsImage:              Mat = Mat()
-    private var mask:          Mat = Mat()
-    private var blurred:       Mat = Mat()
+    var image: Mat = Mat()
+    var greyImage: Mat = Mat()
+    var rgbImage: Mat = Mat()
+    var hlsImage: Mat = Mat()
+    private var mask: Mat = Mat()
+    private var blurred: Mat = Mat()
     private var lowThreshold:  Int = 0
     private var highThreshold: Int = 0
 
@@ -31,7 +31,7 @@ class NintendontImage {
 
     fun loadImage(){
         image = Imgcodecs.imread(url)
-        rgbImage = Imgcodecs.imread(url)
+        rgbImage = image
 //        rgb()
         hls()
         greyscale()

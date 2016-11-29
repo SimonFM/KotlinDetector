@@ -1,6 +1,9 @@
-package com.nintendont.utils
+package com.nintendont.kotlin.detection.utils
 
 import org.opencv.core.Mat
+import org.opencv.core.Rect
+import org.opencv.core.Size
+import org.opencv.imgproc.Imgproc
 import java.awt.FlowLayout
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferByte
@@ -46,6 +49,23 @@ class ImageWindow {
         frame!!.isVisible = false
         frame!!.isVisible = true
         frame!!.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+    }
+
+    fun resizeImage(){
+        val rect = Rect(0, 0, image.cols(), image.rows())
+        val crop = Mat(image, rect) // NOTE: this will only give you a reference to the ROI of the original data
+        val resizeimage = Mat()
+        val sz = Size(1000.0, 1000.0)
+        Imgproc.resize(crop, image, sz)
+    }
+
+    fun resizeImage(image: Mat): Mat {
+        val rect = Rect(0, 0, image.cols(), image.rows())
+        val crop = Mat(image, rect) // NOTE: this will only give you a reference to the ROI of the original data
+        val resizeimage = Mat()
+        val sz = Size(1000.0, 1000.0)
+        Imgproc.resize(crop, resizeimage, sz)
+        return resizeimage
     }
 
     private fun Mat2BufferedImage(m: Mat): BufferedImage {

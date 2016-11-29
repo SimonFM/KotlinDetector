@@ -1,4 +1,4 @@
-package com.nintendont.utils
+package com.nintendont.kotlin.detection.utils
 
 /**
  * Created by simon on 28/11/2016.
