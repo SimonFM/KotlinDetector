@@ -21,9 +21,11 @@ val images = arrayOf("C:\\Users\\simon\\Documents\\GitHub\\KotlinDetector\\src\\
 fun main(args : Array<String>) {
     OpenCV.load("")
     for (url : String in images){
+        println(url)
         val licensePlate = LicensePlate(NintendontImage(url))
         val maskedImage : Mat = licensePlate.maskImage()
         licensePlate.findLicensePlateOutline(maskedImage)
+       // System.`in`.read()
     }
 }
 

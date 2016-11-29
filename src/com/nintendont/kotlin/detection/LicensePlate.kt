@@ -17,11 +17,12 @@ class LicensePlate(original: NintendontImage){
     private val imageData : NintendontImage = original
     private val originalImage : NintendontImage = original
     private val GREEN : Scalar = Scalar(0.0, 255.0, 0.0)
+    private val RED : Scalar = Scalar(0.0, 0.0, 255.0)
 
     fun maskImage(): Mat{
         var gaussianBlur = Mat(); var sobel = Mat()
-        var open = Mat(); var close = Mat()
-        var canny = Mat(); var thresholded = Mat()
+        var open = Mat(); var close = Mat() ;
+        var canny = Mat(); var thresholded = Mat() ; var thresholded1 = Mat()
         val dilate = Mat(); val erode = Mat()
         val kernel = Size(5.0, 5.0)
         val channels = imageData.getChannels(imageData.hlsImage)
@@ -30,24 +31,25 @@ class LicensePlate(original: NintendontImage){
 
         Imgproc.GaussianBlur(channels[1], gaussianBlur, kernel, 0.0)
 
-        Imgproc.Sobel(gaussianBlur, sobel, -2, 2, 0)
-        Imgproc.Canny(gaussianBlur, canny, min, max)
-        var cannyAndSobel = canny.mul(sobel)
+        Imgproc.Sobel(gaussianBlur, sobel, -1, 1, 0)
+        //Imgproc.Canny(gaussianBlur, canny, min, max)
+        //var cannyAndSobel = canny.mul(sobel)
 
-        Imgproc.threshold(cannyAndSobel, thresholded, min, max, Imgproc.THRESH_BINARY)
-        var kernelElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, Size(90.0, 90.0))
+        Imgproc.threshold(sobel, thresholded, min, max, Imgproc.THRESH_BINARY)
+        var kernelElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, Size(75.0, 75.0))
         Imgproc.morphologyEx(thresholded, dilate, Imgproc.MORPH_DILATE, kernelElement)
-        kernelElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, Size(50.0, 50.0))
+        kernelElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, Size(20.0, 20.0))
         Imgproc.morphologyEx(dilate, erode, Imgproc.MORPH_ERODE, kernelElement)
         imageData.image.copyTo(temp, erode)
 
-        ImageWindow(imageData.resizeImage(erode), "erode").show()
-        ImageWindow(imageData.resizeImage(gaussianBlur), "gaussianBlur").show()
-        ImageWindow(imageData.resizeImage(canny), "Canny").show()
-        ImageWindow(imageData.resizeImage(sobel), "Sobel").show()
-        ImageWindow(imageData.resizeImage(cannyAndSobel), "cannyAndSobel").show()
-        ImageWindow(imageData.resizeImage(thresholded), "thresholdedWindow").show()
-        ImageWindow(imageData.resizeImage(dilate), "dilate").show()
+//        ImageWindow(imageData.resizeImage(gaussianBlur), "gaussianBlur").show()
+////        ImageWindow(imageData.resizeImage(canny), "Canny").show()
+//        ImageWindow(imageData.resizeImage(sobel), "Sobel").show()
+////        ImageWindow(imageData.resizeImage(cannyAndSobel), "cannyAndSobel").show()
+//        ImageWindow(imageData.resizeImage(thresholded), "thresholdedWindow").show()
+//        ImageWindow(imageData.resizeImage(dilate), "dilate").show()
+//        ImageWindow(imageData.resizeImage(erode), "erode").show()
+        //ImageWindow(imageData.resizeImage(temp), "mask").show()
         return temp;
     }
 
@@ -71,14 +73,14 @@ class LicensePlate(original: NintendontImage){
     private fun drawContours(contours: List<MatOfPoint>, image : Mat) : Mat{
         val src = Mat()
         image.copyTo(src)
-        val maxContourArea = 90000.0
-        val minContourArea = 3000.0
+        val maxContourArea = 10000.0
+        val minContourArea = 300.0
 
         for(contour : MatOfPoint in contours){
             val approxCurve = MatOfPoint2f()
             val contourArea = Imgproc.contourArea(contour)
 
-            println("Current contour area: " + contourArea)
+            //println("Current contour area: " + contourArea)
             val mat2f : MatOfPoint2f = MatOfPoint2f()
             contour.convertTo(mat2f, CvType.CV_32F)
 
@@ -87,18 +89,21 @@ class LicensePlate(original: NintendontImage){
 
             val points = MatOfPoint(*approxCurve.toArray())
             val rect = Imgproc.boundingRect(points)
-            val aspectRatio : Double = rect.width.toDouble() / rect.height.toDouble()
-            println("Current contour ratio: " + aspectRatio)
-            if (aspectRatio > 1 && aspectRatio < 12 ){//&& rect.area() > minContourArea){// && rect.area() < maxContourArea) {
-                // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
-                val topRightX : Double = (rect.x.toDouble() + rect.width)
-                val topRightY : Double = (rect.y.toDouble() + rect.height)
-                val bottomLeftX : Double = rect.x.toDouble() //- 10
-                val bottomLeftY : Double = rect.y.toDouble() //- 10
-                Imgproc.rectangle(originalImage.rgbImage, Point(bottomLeftX, bottomLeftY), Point(topRightX, topRightY), GREEN, 3)
-            }
+            draw(rect)
         }
         return originalImage.rgbImage
+    }
+
+    private fun draw(rect: Rect) {
+        val aspectRatio: Double = rect.width.toDouble() / rect.height.toDouble()
+        val edgeDensity = 0
+        //println("Current contour ratio: " + aspectRatio)
+        val topRightX: Double = (rect.x.toDouble() + rect.width)
+        val topRightY: Double = (rect.y.toDouble() + rect.height)
+        val bottomLeftX: Double = rect.x.toDouble() //- 10
+        val bottomLeftY: Double = rect.y.toDouble() //- 10
+        val colour = if (aspectRatio > 2 && aspectRatio < 12) RED else GREEN
+        Imgproc.rectangle(originalImage.rgbImage, Point(bottomLeftX, bottomLeftY), Point(topRightX, topRightY), colour, 3)
     }
 
 }

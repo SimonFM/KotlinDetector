@@ -6,21 +6,19 @@ import org.opencv.core.Rect
 import org.opencv.core.Size
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
+import java.awt.Image
 import java.util.*
 
 /**
  * Created by simon on 21/11/2016.
  */
 class NintendontImage {
-    var url:                   String = ""
-    var image: Mat = Mat()
-    var greyImage: Mat = Mat()
-    var rgbImage: Mat = Mat()
-    var hlsImage: Mat = Mat()
-    private var mask: Mat = Mat()
-    private var blurred: Mat = Mat()
-    private var lowThreshold:  Int = 0
-    private var highThreshold: Int = 0
+    var url: String = ""
+    var image: Mat = Mat() ; var greyImage: Mat = Mat()
+    var rgbImage: Mat = Mat() ; var hlsImage: Mat = Mat()
+    var hsv : Mat = Mat() ; var yuv : Mat = Mat()
+    private var mask: Mat = Mat() ; private var blurred: Mat = Mat()
+    private var lowThreshold:  Int = 0 ; private var highThreshold: Int = 0
 
     constructor(url : String){
         this.url = url
@@ -33,6 +31,8 @@ class NintendontImage {
         image = Imgcodecs.imread(url)
         rgbImage = image
 //        rgb()
+        hsv()
+        yuv()
         hls()
         greyscale()
         blur()
@@ -42,6 +42,18 @@ class NintendontImage {
         this.hlsImage = Mat()
         Imgproc.cvtColor(image, hlsImage, Imgproc.COLOR_BGR2HLS)
         return this.hlsImage
+    }
+
+    fun yuv(): Mat {
+        this.yuv = Mat()
+        Imgproc.cvtColor(image, yuv, Imgproc.COLOR_RGB2YUV)
+        return this.yuv
+    }
+
+    fun hsv(): Mat {
+        this.hsv = Mat()
+        Imgproc.cvtColor(image, hsv, Imgproc.COLOR_RGB2HSV)
+        return this.hsv
     }
 
     fun rgb(): Mat {
